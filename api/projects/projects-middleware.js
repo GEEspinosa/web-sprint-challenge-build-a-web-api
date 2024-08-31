@@ -27,33 +27,45 @@ async function validateProject (req, res, next) {
         } else {
             next()
         }
-     
-   
-    
-
 }
 
-// async function validateProjectPut (req, res, next) {
-//     console.log('firing validateProjectPut middleware')
-//     let {completed} = req.body 
 
-//     if (!completed){
-//         console.log('no completed status')
-//         res.status(400).json({
-//             message: 'Project requires name, description, and completed status'
-//         })
-//     }
+const bool = (item) => {
+    if (typeof item === "boolean"){
+        return item
+    } 
+    if (item === "true") {
+        return true
+    }
+    if (item === "false") {
+        return false
+    }
+} 
+
+
+async function validateProjectPut (req, res, next) {
+    console.log('firing validateProjectPut middleware')
+    const {completed} = req.body
+    const boolean = bool(completed)
+
+    if (boolean === undefined) {
+        res.status(400).json({
+            message: 'Project requires name, description, and completed status'
+        })
+    }
     
-//     else {
-//         console.log('we have completed status')
-//         res.updated = req.body
-//         next()
-//     }
-// }
+    else {
+        const {id} = req.params
+        const updatedProject = await Projects.update(id, {...req.body, completed: boolean})
+        req.updatedProject = updatedProject
+        next()
+    }
+}
 
 
 
 module.exports = {
     validateProjectId,
-    validateProject,  
+    validateProject, 
+    validateProjectPut 
 }

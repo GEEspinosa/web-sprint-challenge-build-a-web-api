@@ -4,6 +4,7 @@ const Projects = require('./projects-model')
 const {
     validateProjectId,
     validateProject,
+    validateProjectPut
    
 } = require('./projects-middleware')
 
@@ -39,17 +40,33 @@ router.post('/', validateProject, async (req, res, next) => {
     }
 })
 
-router.put('/:id', validateProjectId, validateProject, async (req, res, next) => {
+router.put('/:id', validateProjectId, validateProject, validateProjectPut, async (req, res, next) => {
     try {
-        const {id} = req.params
-        const updatedProject = await Projects.update(id, req.body)     
-        res.status(201).json(updatedProject)  
+       res.status(201).json(req.updatedProject)
     } catch (err) {
         next(err)
     }       
 })
 
+router.delete('/:id', validateProjectId, async (req, res, next) => {
+    try {
+        await Projects.remove(req.params.id)
+        res.status(200).json({
+            message: 'Project successfully deleted'
+        })
+    } catch (err) {
+        next(err)
+    }
+})
 
+router.get('/:id/actions', validateProjectId, async (req, res, next) => {
+    try {
+        const actions = await Projects.getProjectActions(req.params.id)
+        res.status(200).json(actions)
+    } catch (err) {
+        next(err)
+    }
+})
 
 //error handling middleware
 
